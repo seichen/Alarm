@@ -76,6 +76,10 @@ public class Gui extends Thread {
          * Set a timer to run every minute to check if it is time for an alarm
          */
 
+        int milis = 60000;
+        long time = System.currentTimeMillis();
+        TTS speak = new TTS();
+
         java.util.Timer watch = new Timer();
         watch.scheduleAtFixedRate(new TimerTask() {
             @Override
@@ -91,11 +95,15 @@ public class Gui extends Thread {
                 for (int i = 0; i < alarms.size(); i++) {
                     if (alarms.get(i).isTime(hour, min, day)) {
                         //ALARM
-                        JOptionPane.showMessageDialog(alarmFrame, alarms.get(i).message);
+                        Sound t = new Sound(alarms.get(i).message);
+                        t.start();
+
+                        speak.setMessage(alarms.get(i).message);
+                        speak.speak();
                     }
                 }
             }
-        }, 0, 60000);
+        }, milis - (time % milis), milis);
 
     }
 
@@ -117,6 +125,7 @@ public class Gui extends Thread {
                 hour = Integer.parseInt(br.readLine());
                 minute = Integer.parseInt(br.readLine());
                 day = br.readLine();
+                days = new ArrayList<>();
                 for (int i = 0; i < day.length(); i++) {
                     days.add(Integer.parseInt(String.valueOf(day.charAt(i))));
                 }
@@ -223,16 +232,17 @@ public class Gui extends Thread {
         try {
 
             BufferedWriter bw = new BufferedWriter(new FileWriter(new File(fn)));
+            String days;
 
             for (Alarm a : alarms) {
                 bw.write(a.name + "\n");
                 bw.write(String.valueOf(a.hour) + "\n");
                 bw.write(String.valueOf(a.minute) + "\n");
-                StringBuilder days = new StringBuilder();
+                days = "";
                 for (Integer d : a.days) {
-                    days.append(d);
+                    days = days + d;
                 }
-                bw.write(String.valueOf(days) + "\n");
+                bw.write(days + "\n");
                 bw.write(a.message + "\n");
             }
             bw.write("eof");
